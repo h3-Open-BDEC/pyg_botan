@@ -21,8 +21,7 @@ from typing import Optional, Tuple
 
 class Model(torch.nn.Module):
 
-    def __init__(self,
-                 if_learn_edge=False):
+    def __init__(self):
 
         super().__init__()
 
@@ -30,7 +29,6 @@ class Model(torch.nn.Module):
         n_edge_feature=3
         mlp_size=64
 
-        self.if_learn_edge = if_learn_edge
 
         self.node_encoder = MLP(n_node_feature, mlp_size)
         self.edge_encoder = MLP(n_edge_feature, mlp_size)
@@ -40,15 +38,8 @@ class Model(torch.nn.Module):
         self.num_message_passing_steps = 7     
         self.network = Iterative_Layers( edge_model=EdgeUpdate(mlp_size),
                                          node_model=NodeUpdate(mlp_size),
-                                         steps=self.num_message_passing_steps)        
-        self.reset_parameters()        
+                                         steps=self.num_message_passing_steps)         
 
-    def reset_parameters(self):
-        for item in [self.node_encoder, self.edge_encoder, self.network, self.decoder]: 
-            if hasattr(item, 'reset_parameters'):
-                item.reset_parameters()
-
-        
     def forward(self, data):   
 
         edge_index = data.edge_index    
@@ -62,20 +53,16 @@ class Model(torch.nn.Module):
                                     encoded_edge_attr,
                                     batch)
                 
-        return self.decoder(x) if (self.if_learn_edge==False) else self.decoder(edge_attr)
-        
+        return self.decoder(x), self.decoder(edge_attr)
         
     
 class EdgeUpdate(torch.nn.Module):
 
     def __init__(self, mlp_size):
         super().__init__()
-        self.mlp = MLP(4*mlp_size, mlp_size)
-
-    def reset_parameters(self):
-        self.mlp.reset_parameters()        
+        self.mlp = MLP(4*mlp_size, mlp_size) 
         
-    def forward(self, src, dest, edge_attr, encoded_edge, batch=None):        
+    def forward(self, src, dest, edge_attr, encoded_edge, batch):        
         edge_input = torch.cat([src, dest, edge_attr, encoded_edge], dim=1)   
         out = self.mlp(edge_input)
         return out
@@ -87,9 +74,6 @@ class NodeUpdate(torch.nn.Module):
         
         super().__init__()
         self.mlp = MLP(3*mlp_size, mlp_size)
-
-    def reset_parameters(self):
-        self.mlp.reset_parameters()                
 
     def forward(self, x, edge_index, edge_attr, encoded_x, batch):
         row, col = edge_index
@@ -111,14 +95,6 @@ class MLP(torch.nn.Module):
         if decoder_layer == True:
             self.fc3 = torch.nn.Linear(mlp_size, 1)
 
-
-    def reset_parameters(self):
-        self.fc1.reset_parameters()
-        self.fc2.reset_parameters()
-        if self.decoder_layer == True:
-            self.fc3.reset_parameters()
-            
-
     def forward(self, x):
 
         x = self.fc1(x)
@@ -133,12 +109,13 @@ class MLP(torch.nn.Module):
 
 class Iterative_Layers(torch.nn.Module):
 
-    def __init__(self, edge_model, node_model, steps):
+    def __init__(self, edge_model, node_model, steps=7):
         super().__init__()
         self.edge_model = edge_model
         self.node_model = node_model
         self.num_message_passing_steps = steps        
         self.reset_parameters()
+
         
     def reset_parameters(self):
         for item in [self.node_model, self.edge_model]:
