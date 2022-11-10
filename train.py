@@ -62,8 +62,9 @@ def train_model(p_frac,
     
     model = Model().to(device)
 
-    mmp = "./initial_model/model" + str(seed+1) + ".pth"
-    model.load_state_dict(torch.load(mmp))
+    if (p_frac < 1.0 - 1e-6):
+        mmp = "./initial_model/model" + str(seed+1) + ".pth"
+        model.load_state_dict(torch.load(mmp))
     
     loss_fn = torch.nn.MSELoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, eps=1e-8)
