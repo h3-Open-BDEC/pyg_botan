@@ -23,7 +23,6 @@ import torch_geometric
 class Dataset(torch.nn.Module):
 
     def __init__(self,
-                 if_learn_edge,
                  file_pattern,
                  max_files_to_load=None,
                  n_particles=4096, 
@@ -55,18 +54,21 @@ class Dataset(torch.nn.Module):
         
             node_feature, edge_index, edge_feature = self.make_graph_from_static_structure(initial_positions, types)
 
-            target, mask = \
-                self.get_targets_node(initial_positions, positions, types, if_train) if (if_learn_edge == False) \
-                else self.get_targets_edge(initial_positions, positions,types, if_train)
+            target_n, mask_n = self.get_targets_node(initial_positions, positions, types, if_train)
+            target_e, mask_e = self.get_targets_edge(initial_positions, positions,types, if_train)
 
-            target = torch.tensor( target[:, None], dtype=torch.float )
-            mask = torch.tensor( mask[:, None], dtype=torch.bool )
+            target_n = torch.tensor( target_n[:, None], dtype=torch.float )
+            mask_n = torch.tensor( mask_n[:, None], dtype=torch.bool )
+            target_e = torch.tensor( target_e[:, None], dtype=torch.float )
+            mask_e = torch.tensor( mask_e[:, None], dtype=torch.bool )            
 
             graph = torch_geometric.data.Data(x=node_feature,
                                               edge_index=edge_index,
                                               edge_attr=edge_feature,
-                                              y=target,
-                                              mask=mask)
+                                              y=target_n,
+                                              y_edge=target_e,
+                                              mask=mask_n,
+                                              mask_edge=mask_e)
 
             self.init_positions_data.append(initial_positions)
             self.data.append(graph)
@@ -107,7 +109,11 @@ class Dataset(torch.nn.Module):
         return targets.astype(np.float32), mask
 
 
-    def get_targets_edge(self, initial_positions, trajectory_target_positions, types, if_train=True):
+    def get_targets_edge(self,
+                         initial_positions,
+                         trajectory_target_positions,
+                         types, 
+                         if_train=True):
 
         cross_positions = initial_positions[None, :, :] - initial_positions[:, None, :]
 
