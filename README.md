@@ -8,7 +8,7 @@ This major version of PyG_BOTAN offers simultaneous learning of relative motions
 ## Dataset
 A small dataset for run test is attached in the directory named ``small_data`` in this repo. 
 
-The full dataset for training and tests in our [paper](https://arxiv.org/abs/2206.14024) is available: [public_dataset.tar.gz] (~58 GByte). 
+The full dataset for training and tests in our [paper](https://arxiv.org/abs/2206.14024) is available: [public_dataset.tar.gz](https://ipomoea-www.cc.u-tokyo.ac.jp/i29002/botan/public_dataset.tar.gz) (~58 GByte). 
 
 
 
