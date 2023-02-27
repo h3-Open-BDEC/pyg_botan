@@ -1,14 +1,14 @@
 # PyG_BOTAN
 
 This code offers [PyTorch](https://pytorch.org) and [PyTorch Geometric](https://github.com/pyg-team/pytorch_geometric) (PyG) implementation
-of BOnd TArgetting Network (BOTAN, 牡丹), proposed in our [paper](https://arxiv.org/abs/2206.14024). By BOTAN, intricate relaxation processes in glassy dynamics can be predicted with high precision from the static particle configuration, by setting neighbor-pair separation with time as its target quantity of learning. From a functional viewpoint, this code can be positioned as a straightfoward extension of the previous [TensorFlow/JAX code](https://github.com/deepmind/deepmind-research/tree/master/glassy_dynamics) provided by Deepmind & Google Brain group, offering a feature of predicting particle propensity as well. 
+of BOnd TArgetting Network (BOTAN, 牡丹), proposed in our [paper](https://doi.org/10.1063/5.0129791). By BOTAN, intricate relaxation processes in glassy dynamics can be predicted with high precision from the static particle configuration, by setting neighbor-pair separation with time as its target quantity of learning. From a functional viewpoint, this code can be positioned as a straightfoward extension of the previous [TensorFlow/JAX code](https://github.com/deepmind/deepmind-research/tree/master/glassy_dynamics) provided by Deepmind & Google Brain group, offering a feature of predicting particle propensity as well. 
 
 This major version of PyG_BOTAN offers simultaneous learning of relative motions (edge feature) and particle self-motion (node feature).   
 
 ## Dataset
 A small dataset for run test is attached in the directory named ``small_data`` in this repo. 
 
-The full dataset for training and tests in our [paper](https://arxiv.org/abs/2206.14024) is available: [public_dataset.tar.gz](https://ipomoea-www.cc.u-tokyo.ac.jp/i29002/botan/public_dataset.tar.gz) (~58 GByte). 
+The full dataset for training and tests in our [paper](https://doi.org/10.1063/5.0129791) is available: [public_dataset.tar.gz](https://ipomoea-www.cc.u-tokyo.ac.jp/i29002/botan/public_dataset.tar.gz) (~58 GByte). 
 
 
 
@@ -22,9 +22,9 @@ Please refer to respective websites for installation.  PyTorch Geometric require
 Make sure these packages are installed on the same CUDA (or ROCm) version. 
 
 - Edit ``run.py`` to specify ``temperature`` (0.44 by default),  ``time_index``, and ``p_frac``.
-- ``time_index`` indicates the time point, see [paper](https://arxiv.org/abs/2206.14024).   
+- ``time_index`` indicates the time point, see [paper](https://doi.org/10.1063/5.0129791).   
 The default is ``time_index=7``, alpha-relaxation time. 
-- ``p_frac`` is a hyperparameter ( $p$ in our [paper](https://arxiv.org/abs/2206.14024), in the range \[0,1\])  determining the weight of losses between nodes and edges.  As the two extremes, the model  learns only the particle propensity (node target feature) when ``p_frac=1``,  and conversely it learns only the relative motion (edge target feature) ``p_frac=0``.  Set at 0.4 by default. 
+- ``p_frac`` is a hyperparameter ( $p$ in our [paper](https://doi.org/10.1063/5.0129791), in the range \[0,1\])  determining the weight of losses between nodes and edges.  As the two extremes, the model  learns only the particle propensity (node target feature) when ``p_frac=1``,  and conversely it learns only the relative motion (edge target feature) ``p_frac=0``.  Set at 0.4 by default. 
 - Run the code  
 ```python3 run.py```
 
@@ -48,14 +48,18 @@ All units are in the nondimensional Lennard-Jones units.  Note that the position
 
 If you use this code for your research, please cite as:
 ```
-@misc{botan,
-      title={Predicting the entire glassy dynamics from static structure by machine learning relative motion}, 
-      author={Hayato Shiba and Masatoshi Hanai and Toyotaro Suzumura and Takashi Shimokawabe},
-      year={2022},
-      eprint={2206.14024},
-      archivePrefix={arXiv},
-      primaryClass={cond-mat.dis-nn}
-}
+@article{botan,
+         author = {Shiba,Hayato  and Hanai,Masatoshi  and Suzumura,Toyotaro  and Shimokawabe,Takashi },
+         title = {BOTAN: BOnd TArgeting Network for prediction of slow glassy dynamics by machine learning relative motion},
+         journal = {The Journal of Chemical Physics},
+         volume = {158},
+         number = {8},
+         pages = {084503},
+         year = {2023},
+         doi = {10.1063/5.0129791},
+         URL = {https://doi.org/10.1063/5.0129791}
+         eprint = {https://arxiv.org/abs/2206.14024}
+         }
 ```
 
 ## Confirmed execution check environment
