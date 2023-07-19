@@ -57,7 +57,7 @@ def train_model(p_frac,
 
     train_batch_size = 5 if (p_frac > 1.0 - 1e-6) else 1
     
-    train_data_loader = torch_geometric.loader.DataLoader(trainset, batch_size=1, shuffle=True)
+    train_data_loader = torch_geometric.loader.DataLoader(trainset, batch_size=train_batch_size, shuffle=True)
     test_data_loader = torch_geometric.loader.DataLoader(testset, batch_size=1, shuffle=False)
     
     model = Model().to(device)

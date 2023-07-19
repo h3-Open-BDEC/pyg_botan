@@ -102,9 +102,9 @@ class Dataset(torch.nn.Module):
         targets = np.mean([ np.linalg.norm(t - initial_positions, axis=-1)
                             for t in trajectory_target_positions], axis=0)
 
-        mask = np.ones( len(trajectory_target_positions), dtype=np.bool )
+        mask = np.ones( len(targets), dtype=bool )
         if ( if_train == False):
-            mask = (types == 0).astype(np.bool)
+            mask = (types == 0).astype(bool)
         
         return targets.astype(np.float32), mask
 
@@ -118,8 +118,10 @@ class Dataset(torch.nn.Module):
         cross_positions = initial_positions[None, :, :] - initial_positions[:, None, :]
 
         box_ = self.box[None, None, :]
-        cross_positions += (cross_positions < -box_ / 2.).astype(np.float32) * box_
-        cross_positions -= (cross_positions >= box_ / 2.).astype(np.float32) * box_
+        mod = np.floor( cross_positions / box_ )
+        cross_positions -= mod*box_
+        cross_positions -= (cross_positions > box_ / 2.).astype(np.float32) * box_
+        
 
         distances = np.linalg.norm(cross_positions, axis=-1)
         indices = np.where( (distances < self.edge_threshold) & (distances > 1e-6) )
@@ -130,18 +132,20 @@ class Dataset(torch.nn.Module):
         cross_types = types[None, :]  + types[:, None]
         cross_types = cross_types[indices]
        
-        mask = np.ones( len(edges), dtype=np.bool )
+        mask = np.ones( len(edges), dtype=bool )
         if ( if_train == False):
-            mask = (cross_types == 0).astype(np.bool) *  (edge_distances < 1.35).astype(np.bool)
+            mask = (cross_types == 0).astype(bool) *  (edge_distances < 1.35).astype(bool)
        
         targets = [0.0] * len(edges)
 
         for t in trajectory_target_positions:
             t_cross_positions = t[ indices[1], :] - t[ indices[0], :]
             box__ = self.box[None, :]
-            t_cross_positions += (t_cross_positions < -box__ / 2.).astype(np.float32) * box__
-            t_cross_positions -= (t_cross_positions >= box__ / 2.).astype(np.float32) * box__
-            t_distances = np.linalg.norm(t_cross_positions, axis=-1)
+
+            t_mod = np.floor( t_cross_positions / box__ )
+            t_cross_positions -= t_mod*box__
+            t_cross_positions -= (t_cross_positions > box__ / 2.).astype(np.float32) * box__
+            t_distances = np.linalg.norm(t_cross_positions, axis=-1)            
             
             t_edge_disp = t_distances - edge_distances 
             targets += t_edge_disp / len(trajectory_target_positions)
